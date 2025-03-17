@@ -1,3 +1,35 @@
+body {
+  background-color:lightgrey;
+  padding-bottom: 50px;
+}
+
 #root {
-  color: red;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 10px;
+}
+
+#card {
+  background-color: white;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h3 {
+  text-align: center;
+}
+
+footer {
+  background: gray;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  left: 0;
 }
