@@ -9,6 +9,21 @@
   </head>
 
   <body>
+    <form>
+    <label for="search">
+    Search:  <input type="search" id="search" name="search" placeholder="Search term" />
+    </label>
+    <p id="showed-episodes"></p>
+
+    <label for="episode-select">Select an Episode</label>
+      <select id="episode-select"></select>
+      <button type = "reset">Reset</button>
+      <template id = "option-template">
+      <option>Select an episode</option>
+      </template>
+   
+    </form>
+
     <div id="root">
       <template id="episode-card">
         <section id="card">
