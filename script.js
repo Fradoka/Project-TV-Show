@@ -1,21 +1,54 @@
 //You can edit ALL of the code here
-const rootElem = document.getElementById("root");
+const container = document.getElementById("container");
 const episodeCardTemplate = document.getElementById("episode-card");
 const input = document.getElementById("search");
 const optionSelector = document.getElementById("episode-select");
 const totalEpisodesListed = document.getElementById("showed-episodes");
 const buttonReset = document.getElementById("reset");
 const state = { allEpisodes: [], searchTerm: "" };
+let filmsList = []
 
-async function setup() {
+async function fetchGOT() {
   try {
-    const response = await fetch ("https://api.tvmaze.com/shows/82/episodes");
+    const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     state.allEpisodes = await response.json();
     showEpisode(state.allEpisodes);
   } catch (error) {
-      alert(`Error fetching data: ${error.message}`);
-      console.error('Error fetching data:', error);
+    alert(`Error fetching data: ${error.message}`);
+    console.error('Error fetching data:', error);
+  }
+}
+
+async function fetchAllFilms(){
+  try {
+    const response = await fetch("https://api.tvmaze.com/shows");
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    const data = await response.json();
+    filmsList = data;
+    // showEpisode(state.allEpisodes);
+  } catch (error) {
+    alert(`Error fetching data: ${error.message}`);
+    console.error('Error fetching data:', error);
+  }
+}
+
+async function setup() {
+  fetchGOT();
+  await fetchAllFilms();
+  createFilmOptions(filmsList)
+}
+
+function createFilmOptions(list){
+  const filmOptions = list.map(createOptions);
+  document.getElementById("film-select").innerHTML = `<option value="">-- Select A Film --</option>`;
+  document.getElementById("film-select").append(...filmOptions);
+
+  function createOptions(film){
+    const filmOption = document.createElement('option');
+    filmOption.value = film.id;
+    filmOption.textContent = film.name;
+    return filmOption;
   }
 }
 
@@ -40,7 +73,7 @@ function createOption(episode) {
 }
 
 function showEpisode(episodesToShow) {
-  rootElem.innerHTML = "";
+  container.innerHTML = "";
 
   let episodesToRender;
   if (Array.isArray(episodesToShow)) {
@@ -50,7 +83,7 @@ function showEpisode(episodesToShow) {
   }
 
   const episodeCards = episodesToRender.map(createEpisodeCard);
-  rootElem.append(...episodeCards);
+  container.append(...episodeCards);
   const episodesList = episodesToRender.map(createOption);
   optionSelector.innerHTML = `<option value="">-- Select an episode --</option>`;
   optionSelector.append(...episodesList);
@@ -70,7 +103,7 @@ input.addEventListener("input", function () {
 optionSelector.addEventListener("change", function () {
   const chosenEpisode = state.allEpisodes.find((episode) => episode.id == this.value);
   if (chosenEpisode) {
-    rootElem.innerHTML = "";
+    container.innerHTML = "";
     showEpisode(chosenEpisode);
   }
   input.value = "";
