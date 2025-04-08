@@ -5,7 +5,7 @@ body {
   text-align: center;
 }
 
-#root {
+#container {
   display: grid;
   grid-template-columns: 0.8fr 0.8fr 0.8fr 0.8fr;
   gap: 25px;
