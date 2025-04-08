@@ -28,7 +28,13 @@ async function fetchAllFilms(){
     const response = await fetch("https://api.tvmaze.com/shows");
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     const data = await response.json();
-    filmsList = data;
+    filmsList = data.sort((a, b) => {
+      const nameA = a.name.toLowerCase();
+      const nameB = b.name.toLowerCase();
+      if (nameA < nameB) return -1;
+      if (nameA > nameB) return 1;
+      return 0;
+    });
   } catch (error) {
     alert(`Error fetching data: ${error.message}`);
     console.error('Error fetching data:', error);
@@ -40,7 +46,6 @@ async function setup() {
   await fetchAllFilms();
   createFilmOptions(filmsList);
   filmSelectHandle()
-  filmFetch(selectedFilm);
 }
 
 function createFilmOptions(list){
