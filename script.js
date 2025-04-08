@@ -6,11 +6,14 @@ const optionSelector = document.getElementById("episode-select");
 const totalEpisodesListed = document.getElementById("showed-episodes");
 const buttonReset = document.getElementById("reset");
 const state = { allEpisodes: [], searchTerm: "" };
-let filmsList = []
+let filmsList = [];
+let selectedFilm = 82;
 
-async function fetchGOT() {
+
+
+async function filmFetch(selectedFilm) {
   try {
-    const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
+    const response = await fetch(`https://api.tvmaze.com/shows/${selectedFilm}/episodes`);
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     state.allEpisodes = await response.json();
     showEpisode(state.allEpisodes);
@@ -26,7 +29,6 @@ async function fetchAllFilms(){
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     const data = await response.json();
     filmsList = data;
-    // showEpisode(state.allEpisodes);
   } catch (error) {
     alert(`Error fetching data: ${error.message}`);
     console.error('Error fetching data:', error);
@@ -34,9 +36,11 @@ async function fetchAllFilms(){
 }
 
 async function setup() {
-  fetchGOT();
+  filmFetch(selectedFilm);
   await fetchAllFilms();
-  createFilmOptions(filmsList)
+  createFilmOptions(filmsList);
+  filmSelectHandle()
+  filmFetch(selectedFilm);
 }
 
 function createFilmOptions(list){
@@ -115,5 +119,14 @@ buttonReset.addEventListener("click", () => {
   state.searchTerm = "";
   showEpisode(state.allEpisodes);
 })
+
+function filmSelectHandle() {
+  document.getElementById("film-select").addEventListener("change", function () {
+    let selectedFilm = filmsList.find((film) => film.id == this.value);
+    if (selectedFilm) {
+      container.innerHTML = "";
+      selectedFilm=selectedFilm.id;
+      filmFetch(selectedFilm);
+}})}
 
 window.onload = setup;
