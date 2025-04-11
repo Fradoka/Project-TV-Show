@@ -22,6 +22,16 @@ body {
   
 }
 
+#listing {
+  background-color: white;
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+}
+
 h3 {
   text-align: center;
 }
