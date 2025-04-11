@@ -11,8 +11,6 @@ const state = { allEpisodes: [], searchTerm: "" };
 let filmsList = [];
 let selectedFilm = null;
 
-
-
 async function filmFetch(selectedFilm) {
   try {
     const response = await fetch(`https://api.tvmaze.com/shows/${selectedFilm}/episodes`);
@@ -47,10 +45,8 @@ async function fetchAllFilms(){
 }
 
 async function setup() {
-  // filmFetch(selectedFilm);
   await fetchAllFilms();
   displayTvShows(filmsList);
-  //filmSelectHandle()
 }
 
 function createFilmOptions(list){
