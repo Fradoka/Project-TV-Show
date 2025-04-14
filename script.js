@@ -77,20 +77,29 @@ function createEpisodeCard({
   },
 }) {
   const episodeCard = episodeCardTemplate.content.cloneNode(true);
-  episodeCard.querySelector("h3").textContent = name;
-  episodeCard.querySelector("h4").textContent = `S${season
+  const title = name || "Untitled"
+  episodeCard.querySelector("h3").textContent = title;
+
+  const safeSeason = typeof season === "number" ? season : 0;
+  const safeNumber = typeof number === "number" ? number : 0;
+  episodeCard.querySelector("h4").textContent = `S${safeSeason
     .toString()
-    .padStart(2, "0")}E${number.toString().padStart(2, "0")}`;
-  episodeCard.querySelector("img").src = image?.medium
-    ? image.medium
-    : "https://picsum.photos/";
-  episodeCard.querySelector("p").innerHTML = summary;
+    .padStart(2, "0")}E${safeNumber.toString().padStart(2, "0")}`;
+
+  const imgUrl = image?.medium || "/favicon.ico";
+  episodeCard.querySelector("img").src = imgUrl;
+
+  const episodeSummary = summary || "<p>No summary available.</p>";
+  episodeCard.querySelector("p").innerHTML = episodeSummary;
+
   return episodeCard;
 }
 
 function createTVShowCard(tvshow) {
   const tvShowCard = tvShowCardTemplate.content.cloneNode(true);
-  tvShowCard.querySelector("h3").textContent = tvshow.name;
+
+  const title = tvshow.name || "Untitled";
+  tvShowCard.querySelector("h3").textContent = title;
   tvShowCard.querySelector("h3").addEventListener("click", function () {
     let selected = filmsList.find((film) => film.name == this.textContent);
     if (selected) {
@@ -99,13 +108,26 @@ function createTVShowCard(tvshow) {
       filmFetch(selectedFilm);
     }
   });
-  tvShowCard.querySelector("h3").style.cursor = "pointer";
-  tvShowCard.querySelector("#rating").textContent = tvshow.rating.average;
-  tvShowCard.querySelector("#genres").textContent = tvshow.genres.join(" | ");
-  tvShowCard.querySelector("#status").textContent = tvshow.status;
-  tvShowCard.querySelector("#runtime").textContent = tvshow.runtime;
-  tvShowCard.querySelector("img").src = tvshow.image.medium;
-  tvShowCard.querySelector("#show-text").innerHTML = tvshow.summary;
+  
+  const rating = tvshow.rating?.average ?? "N/A";
+  tvShowCard.querySelector("#rating").textContent = rating;
+
+  const genres = Array.isArray(tvshow.genres)
+    ? tvshow.genres.join(" | ")
+    : "No genres listed";
+  tvShowCard.querySelector("#genres").textContent = genres;
+
+  tvShowCard.querySelector("#status").textContent = tvshow.status || "Unknown";
+
+  tvShowCard.querySelector("#runtime").textContent = tvshow.runtime ?? "N/A";
+
+  const imageUrl = tvshow.image?.medium || "/favicon.ico";
+  tvShowCard.querySelector("img").src = imageUrl;
+
+  tvShowCard.querySelector("#show-text").innerHTML =
+    tvshow.summary || "<p>No summary available.</p>";
+  
+  tvShowCard.querySelector("#listing").style.cursor = "pointer";
   tvShowCard.querySelector("#listing").addEventListener("click", function () {
     let selected = filmsList.find((film) => film.id == tvshow.id);
     if (selected) {
@@ -114,6 +136,7 @@ function createTVShowCard(tvshow) {
       filmFetch(selectedFilm);
     }
   });
+
   return tvShowCard;
 }
 
