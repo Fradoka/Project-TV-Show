@@ -1,5 +1,5 @@
 body {
-  background-color:lightgrey;
+  background-color: lightgrey;
   padding-bottom: 50px;
   margin: 50px;
   text-align: center;
@@ -11,7 +11,9 @@ body {
   gap: 25px;
   margin: 25px;
 }
-
+#episode-section {
+  display: none;
+}
 #card {
   background-color: white;
   padding: 10px;
@@ -19,7 +21,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  
 }
 
 #listing {
@@ -29,9 +30,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  
 }
-
 
 h3 {
   color: blue;
@@ -48,6 +47,6 @@ footer {
   width: 100%;
   left: 0;
 }
-footer a{
+footer a {
   color: black;
 }

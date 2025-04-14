@@ -1,7 +1,7 @@
 //You can edit ALL of the code here
 const container = document.getElementById("container");
 const episodeCardTemplate = document.getElementById("episode-card");
-const tvShowCardTemplate = document.getElementById("tvshow-card")
+const tvShowCardTemplate = document.getElementById("tvshow-card");
 const input = document.getElementById("search");
 const optionSelector = document.getElementById("episode-select");
 const totalEpisodesListed = document.getElementById("showed-episodes");
@@ -13,7 +13,9 @@ let selectedFilm = null;
 
 async function filmFetch(selectedFilm) {
   try {
-    const response = await fetch(`https://api.tvmaze.com/shows/${selectedFilm}/episodes`);
+    const response = await fetch(
+      `https://api.tvmaze.com/shows/${selectedFilm}/episodes`
+    );
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     state.allEpisodes = await response.json();
     showEpisode(state.allEpisodes);
@@ -22,11 +24,11 @@ async function filmFetch(selectedFilm) {
     ).name;
   } catch (error) {
     alert(`Error fetching data: ${error.message}`);
-    console.error('Error fetching data:', error);
+    console.error("Error fetching data:", error);
   }
 }
 
-async function fetchAllFilms(){
+async function fetchAllFilms() {
   try {
     const response = await fetch("https://api.tvmaze.com/shows");
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -40,7 +42,7 @@ async function fetchAllFilms(){
     });
   } catch (error) {
     alert(`Error fetching data: ${error.message}`);
-    console.error('Error fetching data:', error);
+    console.error("Error fetching data:", error);
   }
 }
 
@@ -49,34 +51,56 @@ async function setup() {
   displayTvShows(filmsList);
 }
 
-function createFilmOptions(list){
+function createFilmOptions(list) {
   const filmOptions = list.map(createOptions);
-  document.getElementById("film-select").innerHTML = `<option value="">-- Select A Film --</option>`;
+  document.getElementById(
+    "film-select"
+  ).innerHTML = `<option value="">-- Select A TV Show --</option>`;
   document.getElementById("film-select").append(...filmOptions);
 
-  function createOptions(film){
-    const filmOption = document.createElement('option');
+  function createOptions(film) {
+    const filmOption = document.createElement("option");
     filmOption.value = film.id;
     filmOption.textContent = film.name;
     return filmOption;
   }
 }
 
-function createEpisodeCard({name, season, number, image: { medium, original }, summary, _links: { self: { href }, },}) {
+function createEpisodeCard({
+  name,
+  season,
+  number,
+  summary,
+  image,
+  _links: {
+    self: { href },
+  },
+}) {
   const episodeCard = episodeCardTemplate.content.cloneNode(true);
-  episodeCard.querySelector("h3").textContent = name;
-  episodeCard.querySelector("h4").textContent = `S${season
+  const title = name || "Untitled"
+  episodeCard.querySelector("h3").textContent = title;
+
+  const safeSeason = typeof season === "number" ? season : 0;
+  const safeNumber = typeof number === "number" ? number : 0;
+  episodeCard.querySelector("h4").textContent = `S${safeSeason
     .toString()
-    .padStart(2, "0")}E${number.toString().padStart(2, "0")}`;
-  episodeCard.querySelector("img").src = medium;
-  episodeCard.querySelector("p").innerHTML = summary;
+    .padStart(2, "0")}E${safeNumber.toString().padStart(2, "0")}`;
+
+  const imgUrl = image?.medium || "/favicon.ico";
+  episodeCard.querySelector("img").src = imgUrl;
+
+  const episodeSummary = summary || "<p>No summary available.</p>";
+  episodeCard.querySelector("p").innerHTML = episodeSummary;
+
   return episodeCard;
 }
 
-function createTVShowCard (tvshow) {
+function createTVShowCard(tvshow) {
   const tvShowCard = tvShowCardTemplate.content.cloneNode(true);
-  tvShowCard.querySelector("h3").textContent = tvshow.name;
-  tvShowCard.querySelector("h3").addEventListener("click", function (){
+
+  const title = tvshow.name || "Untitled";
+  tvShowCard.querySelector("h3").textContent = title;
+  tvShowCard.querySelector("h3").addEventListener("click", function () {
     let selected = filmsList.find((film) => film.name == this.textContent);
     if (selected) {
       container.innerHTML = "";
@@ -84,14 +108,36 @@ function createTVShowCard (tvshow) {
       filmFetch(selectedFilm);
     }
   });
-  tvShowCard.querySelector("h3").style.cursor = "pointer";
-  tvShowCard.querySelector("#rating").textContent = tvshow.rating.average;
-  tvShowCard.querySelector("#genres").textContent = tvshow.genres.join(" | ");
-  tvShowCard.querySelector("#status").textContent = tvshow.status;
-  tvShowCard.querySelector("#runtime").textContent = tvshow.runtime;
-  tvShowCard.querySelector("img").src = tvshow.image.medium;
-  tvShowCard.querySelector("#show-text").innerHTML = tvshow.summary;
-  return tvShowCard
+  
+  const rating = tvshow.rating?.average ?? "N/A";
+  tvShowCard.querySelector("#rating").textContent = rating;
+
+  const genres = Array.isArray(tvshow.genres)
+    ? tvshow.genres.join(" | ")
+    : "No genres listed";
+  tvShowCard.querySelector("#genres").textContent = genres;
+
+  tvShowCard.querySelector("#status").textContent = tvshow.status || "Unknown";
+
+  tvShowCard.querySelector("#runtime").textContent = tvshow.runtime ?? "N/A";
+
+  const imageUrl = tvshow.image?.medium || "/favicon.ico";
+  tvShowCard.querySelector("img").src = imageUrl;
+
+  tvShowCard.querySelector("#show-text").innerHTML =
+    tvshow.summary || "<p>No summary available.</p>";
+  
+  tvShowCard.querySelector("#listing").style.cursor = "pointer";
+  tvShowCard.querySelector("#listing").addEventListener("click", function () {
+    let selected = filmsList.find((film) => film.id == tvshow.id);
+    if (selected) {
+      container.innerHTML = "";
+      selectedFilm = selected.id;
+      filmFetch(selectedFilm);
+    }
+  });
+
+  return tvShowCard;
 }
 
 function createOption(episode) {
@@ -124,7 +170,7 @@ function showEpisode(episodesToShow) {
   totalEpisodesListed.innerText = `Showing ${episodesToRender.length}/ ${state.allEpisodes.length} Episodes.`;
 }
 
-function displayTvShows (tvShowsToDisplay) {
+function displayTvShows(tvShowsToDisplay) {
   container.innerHTML = "";
   document.getElementById("episode-section").style.display = "none";
   document.getElementById("tvshow-section").style.display = "block";
@@ -136,19 +182,20 @@ function displayTvShows (tvShowsToDisplay) {
     tvShowToRender = [tvShowsToDisplay];
   }
 
-  const tvShowCards = tvShowToRender.map (createTVShowCard);
+  const tvShowCards = tvShowToRender.map(createTVShowCard);
   container.append(...tvShowCards);
   createFilmOptions(tvShowToRender);
 }
 
 input.addEventListener("input", function () {
   state.searchTerm = input.value;
-  const filteredEpisodes = state.allEpisodes.filter((episode) =>
+  const filteredEpisodes = state.allEpisodes.filter(
+    (episode) =>
       episode.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
       episode.summary.toLowerCase().includes(state.searchTerm.toLowerCase())
   );
-    showEpisode(filteredEpisodes);
-  return filteredEpisodes
+  showEpisode(filteredEpisodes);
+  return filteredEpisodes;
 });
 
 tvShowSearchInput.addEventListener("input", () => {
@@ -165,7 +212,9 @@ tvShowSearchInput.addEventListener("input", () => {
 });
 
 optionSelector.addEventListener("change", function () {
-  const chosenEpisode = state.allEpisodes.find((episode) => episode.id == this.value);
+  const chosenEpisode = state.allEpisodes.find(
+    (episode) => episode.id == this.value
+  );
   if (chosenEpisode) {
     container.innerHTML = "";
     showEpisode(chosenEpisode);
@@ -178,7 +227,7 @@ buttonReset.addEventListener("click", () => {
   input.value = "";
   state.searchTerm = "";
   showEpisode(state.allEpisodes);
-})
+});
 
 document.getElementById("back-to-shows").addEventListener("click", () => {
   input.value = "";
@@ -190,9 +239,9 @@ document.getElementById("film-select").addEventListener("change", function () {
   let selected = filmsList.find((film) => film.id == this.value);
   if (selected) {
     container.innerHTML = "";
-    selectedFilm= selected.id;
+    selectedFilm = selected.id;
     filmFetch(selectedFilm);
   }
-})
+});
 
 window.onload = setup;
